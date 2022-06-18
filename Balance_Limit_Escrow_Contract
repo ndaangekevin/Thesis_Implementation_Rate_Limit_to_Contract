@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract Escrow {
+
+  address payable public client;
+  address payable public freelancer;
+  address payable public arbiter;
+  
+  constructor(address payable _freelancer, address payable _arbiter) {
+    client = payable(msg.sender);
+    freelancer = _freelancer;
+    arbiter = _arbiter;
+  }
+  
+
+function deposit(uint256 amount)  public payable limitedPayable {
+    require(msg.value == amount);
+    // nothing else to do!
+}
+
+
+
+//balance limit code
+modifier limitedPayable() {
+require(address(this).balance <=50 ether);
+_;
+}
+
+
+
+
+  event Received(address, uint);
+
+    receive() external payable limitedPayable {
+      emit Received(msg.sender, msg.value);
+    }
+
+  function payoutToFreelancer() public {
+    if(msg.sender == client || msg.sender == arbiter) {
+      freelancer.transfer(address(this).balance);
+    }
+  }
+  
+  function refundToClient() public{
+    if(msg.sender == freelancer || msg.sender == arbiter) {
+      client.transfer(address(this).balance);
+    }
+  }
+  
+  function getBalance(
+    ) public view returns(uint256){
+        return address(this).balance;
+    }
+
+}
